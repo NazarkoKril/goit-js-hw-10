@@ -27,20 +27,20 @@ function handleChangeEvent(e) {
     loaderEl.classList.remove('is-hidden');
     catInfoEl.innerHTML = '';
     catId = e.target.value;
-    fetchCatByBreed(catId)
-        .then(cat => {
-                catInfoEl.insertAdjacentHTML('afterbegin', renderingCatImg(cat))
-        })
-        .catch(error => Notiflix.Notify.failure('Qui timide rogat docet negare'))
-        .finally(() => {
-            loaderEl.classList.add('is-hidden')
-        })
-    fetchBreeds()
-        .then(cats => {
-            const correctCat = cats.find(cat => cat.id === catId);
-            catInfoEl.insertAdjacentHTML('beforeend', renderingCatIfo(correctCat));
-        })
-        .catch(error => Notiflix.Notify.failure('Qui timide rogat docet negare'));
+
+    Promise.all([
+        fetchCatByBreed(catId)
+    ]).then(([cat]) => {
+        catInfoEl.insertAdjacentHTML('afterbegin', renderingCatImg(cat));
+        return fetchBreeds();
+    }).then(cats => {
+        const correctCat = cats.find(cat => cat.id === catId);
+        catInfoEl.insertAdjacentHTML('beforeend', renderingCatIfo(correctCat));
+    }).catch(error => {
+        Notiflix.Notify.failure('Qui timide rogat docet negare');
+    }).finally(() => {
+        loaderEl.classList.add('is-hidden');
+    });
 }
 
 function renderingVariates(breeds) {
